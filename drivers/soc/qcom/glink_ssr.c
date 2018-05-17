@@ -32,7 +32,9 @@
 #define GLINK_SSR_LOG(x...)
 #define GLINK_SSR_ERR(x...)
 
+#ifdef CONFIG_IPC_LOGGING
 static void *glink_ssr_log_ctx;
+#endif
 
 /* Global restart counter */
 static uint32_t sequence_number;
