@@ -1513,7 +1513,7 @@ static ssize_t disksize_store(struct device *dev,
 		goto out_unlock;
 	}
 
-        ramgb = totalram_pages << (PAGE_SHIFT - 10);
+        ramgb = totalram_pages() << (PAGE_SHIFT - 10);
         if (ramgb < 3000000) {
                disksize = (u64)1536 * SZ_1M;
         } else {
