@@ -50,6 +50,9 @@ VERBOSE=0
 ZIPNAME=Nexus-Blu-EAS
 FINAL_ZIP=${ZIPNAME}-${VERSION}-${TYPE}-${DRONE_BUILD_NUMBER}.zip
 
+# Polly Optimizer
+git apply polly.p
+
 # CI
         if [ "$CI" ]; then
            if [ "$CIRCLECI" ]; then
