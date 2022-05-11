@@ -1500,6 +1500,7 @@ static ssize_t disksize_store(struct device *dev,
 	struct zcomp *comp;
 	struct zram *zram = dev_to_zram(dev);
 	int err;
+        long ramgb;
 
 	disksize = memparse(buf, NULL);
 	if (!disksize)
@@ -1511,6 +1512,13 @@ static ssize_t disksize_store(struct device *dev,
 		err = -EBUSY;
 		goto out_unlock;
 	}
+
+        ramgb = totalram_pages << (PAGE_SHIFT - 10);
+        if (ramgb < 3000000) {
+               disksize = (u64)1536 * SZ_1M;
+        } else {
+               disksize = (u64)2048 * SZ_1M;
+        }
 
 	disksize = PAGE_ALIGN(disksize);
 	if (!zram_meta_alloc(zram, disksize)) {
