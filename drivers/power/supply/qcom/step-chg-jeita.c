@@ -124,8 +124,9 @@ static struct jeita_fcc_cfg jeita_fcc_config = {
 		/* TEMP_LOW	TEMP_HIGH	FCC */
 		{0,		50,		300000},
 		{51,		150,		900000},
-		{151,	450,		2900000},
-		{451,	600,		1500000},
+		{151,   	440,		2400000},
+		{441,   	460,		1800000},
+		{461,   	600,		1200000},
 	},
 };
 #elif defined(CONFIG_KERNEL_CUSTOM_F7A)
@@ -137,8 +138,9 @@ static struct jeita_fcc_cfg jeita_fcc_config = {
 		/* TEMP_LOW	TEMP_HIGH	FCC */
 		{0,		50,		400000},
 		{51,		150,		1200000},
-		{151,	450,		2900000},
-		{451,	600,		2000000},
+		{151,   	440,		2400000},
+		{441,   	460,		1800000},
+		{461,   	600,		1200000},
 	},
 };
 #elif defined(CONFIG_KERNEL_CUSTOM_E7S)
