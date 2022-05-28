@@ -10,17 +10,27 @@ set -e
 ##----------------------------------------------------------##
 # Basic Information
 KERNEL_DIR="$(pwd)"
-VERSION=X1-Old
+VERSION=X1
 MODEL=Xiaomi
 DEVICE=lavender
 DEFCONFIG=lavender-perf_defconfig
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
+if [ "$1" = "--old" ]; then
+TYPE=Old
+elif [ "$1" = "--new" ]; then
+TYPE=New
+echo "CONFIG_XIAOMI_NEWCAM=y" >> arch/arm64/configs/$DEFCONFIG
+elif [ "$1" = "--qti" ]; then
+TYPE=Qti
+elif [ "$1" = "--qti.12" ]; then
+TYPE=Qti-A12
+fi
 ##----------------------------------------------------------##
 ## Export Variables and Info
 function exports() {
 export ARCH=arm64
 export SUBARCH=arm64
-export LOCALVERSION="-${VERSION}"
+export LOCALVERSION="-Blu-EAS-${VERSION}-${TYPE}"
 export KBUILD_BUILD_HOST=NexGang
 export KBUILD_BUILD_USER="SpiDy"
 export KBUILD_BUILD_VERSION=$DRONE_BUILD_NUMBER
@@ -37,8 +47,8 @@ TANGGAL=$(date +"%F%S")
 TOOLCHAIN=nexus14 # List ( gcc = eva | aospa | nexus9 | nexus12 ) (clang = atomx | aosp | sdclang | proton | nexus14 )
 LINKER=ld # List ( ld.lld | ld.bfd | ld.gold | ld )
 VERBOSE=0
-ZIPNAME=Nexus-Blu
-FINAL_ZIP=${ZIPNAME}-${VERSION}-${DRONE_BUILD_NUMBER}.zip
+ZIPNAME=Nexus-Blu-EAS
+FINAL_ZIP=${ZIPNAME}-${VERSION}-${TYPE}-${DRONE_BUILD_NUMBER}.zip
 
 # CI
         if [ "$CI" ]; then
@@ -53,6 +63,7 @@ FINAL_ZIP=${ZIPNAME}-${VERSION}-${DRONE_BUILD_NUMBER}.zip
 }
 ##----------------------------------------------------------##
 ## Telegram Bot Integration
+if [ "$1" = "--old" ]; then
 function post_msg() {
 	curl -s -X POST "https://api.telegram.org/bot$token/sendMessage" \
 	-d chat_id="$chat_id" \
@@ -60,6 +71,7 @@ function post_msg() {
 	-d "parse_mode=html" \
 	-d text="$1"
 	}
+fi
 
 function push() {
 	curl -F document=@$1 "https://api.telegram.org/bot$token/sendDocument" \
@@ -128,7 +140,9 @@ function compile() {
 START=$(date +"%s")
 
 # Push Notification
+if [ "$1" = "--old" ]; then
 post_msg "<b>$KBUILD_BUILD_VERSION CI Build Triggered</b>%0A<b>Docker OS: </b><code>$DISTRO</code>%0A<b>Kernel Version : </b><code>$KERVER</code>%0A<b>Date : </b><code>$(TZ=Asia/Kolkata date)</code>%0A<b>Device : </b><code>$MODEL [$DEVICE]</code>%0A<b>Version : </b><code>$VERSION</code>%0A<b>Pipeline Host : </b><code>$KBUILD_BUILD_HOST</code>%0A<b>Host Core Count : </b><code>$PROCS</code>%0A<b>Compiler Used : </b><code>$KBUILD_COMPILER_STRING</code>%0A<b>Branch : </b><code>$CI_BRANCH</code>%0A<b>Top Commit : </b><a href='$DRONE_COMMIT_LINK'>$COMMIT_HEAD</a>"
+fi
 
 # Generate .config
 make O=out ARCH=arm64 ${DEFCONFIG}
@@ -147,7 +161,7 @@ fi
 	   then
 	       push "error.log" "Build Throws Errors"
 	       exit 1
-	   else
+	   elif [ "$1" = "--old" ]; then
       	       post_msg " Kernel Compilation Finished. Started Zipping "
 	fi
 }
