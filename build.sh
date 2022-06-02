@@ -34,7 +34,7 @@ DATE=$(TZ=Asia/Kolkata date +"%Y%m%d-%T")
 TANGGAL=$(date +"%F%S")
 
 # Compiler and Build Information
-TOOLCHAIN=proton # List ( gcc = eva | aospa | nexus9 | nexus12 ) (clang = atomx | aosp | sdclang | proton )
+TOOLCHAIN=nexus14 # List ( gcc = eva | aospa | nexus9 | nexus12 ) (clang = atomx | aosp | sdclang | proton | nexus14 )
 LINKER=ld # List ( ld.lld | ld.bfd | ld.gold | ld )
 VERBOSE=0
 ZIPNAME=Nexus-Blu
@@ -78,6 +78,8 @@ if [[ $TOOLCHAIN == "eva" ]]; then
 elif [[ $TOOLCHAIN == "aospa" ]]; then
        git clone --depth=1 https://github.com/AOSPA/android_prebuilts_gcc_linux-x86_aarch64_aarch64-elf gcc64
        git clone --depth=1 https://github.com/AOSPA/android_prebuilts_gcc_linux-x86_arm_arm-eabi gcc32
+elif [[ $TOOLCHAIN == "nexus14" ]]; then
+       git clone --depth=1 https://gitlab.com/Project-Nexus/nexus-clang clang
 elif [[ $TOOLCHAIN == "nexus9" ]]; then
        git clone --depth=1 https://github.com/reaPeR1010/arm64-gcc -b gcc-9 gcc64
        git clone --depth=1 https://github.com/reaPeR1010/arm32-gcc -b gcc-9 gcc32
@@ -108,7 +110,7 @@ git clone --depth=1 https://github.com/reaPeR1010/AnyKernel3 AK3
 # Set PATH
 if [[ "$TOOLCHAIN" == "eva" || "$TOOLCHAIN" == "aospa" || "$TOOLCHAIN" == "nexus9" || "$TOOLCHAIN" == "nexus12" ]]; then
        PATH="${KERNEL_DIR}/gcc64/bin/:${KERNEL_DIR}/gcc32/bin/:/usr/bin:${PATH}"
-elif [[ "$TOOLCHAIN" == "atomx" || "$TOOLCHAIN" == "proton" ]]; then
+elif [[ "$TOOLCHAIN" == "atomx" || "$TOOLCHAIN" == "proton" || "$TOOLCHAIN" == "nexus14" ]]; then
        PATH="${KERNEL_DIR}/clang/bin:${PATH}"
 elif [[ "$TOOLCHAIN" == "aosp" || "$TOOLCHAIN" == "sdclang" ]]; then
        PATH="${KERNEL_DIR}/clang/bin:${KERNEL_DIR}/gcc64/bin:${KERNEL_DIR}/gcc32/bin:${PATH}"
@@ -117,7 +119,7 @@ fi
 # Export KBUILD_COMPILER_STRING
 if [[ "$TOOLCHAIN" == "eva" || "$TOOLCHAIN" == "aospa" || "$TOOLCHAIN" == "nexus9" || "$TOOLCHAIN" == "nexus12" ]]; then
        export KBUILD_COMPILER_STRING=$(${KERNEL_DIR}/gcc64/bin/aarch64-elf-gcc --version | head -n 1)
-elif [[ "$TOOLCHAIN" == "atomx" || "$TOOLCHAIN" == "proton" || "$TOOLCHAIN" == "aosp" || "$TOOLCHAIN" == "sdclang" ]]; then
+elif [[ "$TOOLCHAIN" == "atomx" || "$TOOLCHAIN" == "proton" || "$TOOLCHAIN" == "aosp" || "$TOOLCHAIN" == "sdclang" || "$TOOLCHAIN" == "nexus14" ]]; then
        export KBUILD_COMPILER_STRING=$(${KERNEL_DIR}/clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 fi
 }
@@ -134,7 +136,7 @@ make O=out ARCH=arm64 ${DEFCONFIG}
 # Start Compilation
 if [[ "$TOOLCHAIN" == "eva" || "$TOOLCHAIN" == "aospa" || "$TOOLCHAIN" == "nexus9" || "$TOOLCHAIN" == "nexus12" ]]; then
      make -kj$(nproc --all) O=out ARCH=arm64 CROSS_COMPILE_ARM32=arm-eabi- CROSS_COMPILE=aarch64-elf- AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip OBJSIZE=llvm-size V=$VERBOSE 2>&1 | tee error.log
-elif [[ "$TOOLCHAIN" == "atomx" || "$TOOLCHAIN" == "proton" ]]; then
+elif [[ "$TOOLCHAIN" == "atomx" || "$TOOLCHAIN" == "proton" || "$TOOLCHAIN" == "nexus14" ]]; then
      make -kj$(nproc --all) O=out ARCH=arm64 CC=clang CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip READELF=llvm-readelf OBJSIZE=llvm-size V=$VERBOSE 2>&1 | tee error.log
 elif [[ "$TOOLCHAIN" == "aosp" || "$TOOLCHAIN" == "sdclang" ]]; then
      make -kj$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi- V=$VERBOSE 2>&1 | tee error.log
