@@ -30,7 +30,7 @@ fi
 function exports() {
 export ARCH=arm64
 export SUBARCH=arm64
-export LOCALVERSION="-Blu-EAS-${VERSION}-${TYPE}"
+export LOCALVERSION="-${TYPE}"
 export KBUILD_BUILD_HOST=NexGang
 export KBUILD_BUILD_USER="SpiDy"
 export KBUILD_BUILD_VERSION=$DRONE_BUILD_NUMBER
