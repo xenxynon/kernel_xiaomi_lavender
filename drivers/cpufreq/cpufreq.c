@@ -765,7 +765,7 @@ static ssize_t store_##file_name					\
 	int ret, temp;							\
 	struct cpufreq_policy new_policy;				\
 									\
-	if (&policy->object == &policy->min)				\
+	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))				\
 		return count;						\
 									\
 	memcpy(&new_policy, policy, sizeof(*policy));			\
